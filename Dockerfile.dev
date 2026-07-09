@@ -1,0 +1,16 @@
+FROM node:22-slim
+
+WORKDIR /app
+
+# Install git (required by Angular CLI for project generation)
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Install Angular CLI globally
+RUN npm install -g @angular/cli
+
+# Create a global command (alias) for ng-serve with polling enabled
+RUN echo '#!/bin/bash\nng serve --host 0.0.0.0 --poll 2000 "$@"' > /usr/local/bin/ng-serve && \
+    chmod +x /usr/local/bin/ng-serve
+
+# Keep the container running for development
+CMD ["tail", "-f", "/dev/null"]
