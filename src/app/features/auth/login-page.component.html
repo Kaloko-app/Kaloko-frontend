@@ -1,0 +1,25 @@
+<div class="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h2 class="mt-6 text-center text-3xl font-extrabold text-text-main">
+      Sign in to Kaloko
+    </h2>
+  </div>
+
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-surface py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <app-login-form 
+        (login)="onLogin($event)"
+        [errorMessage]="errorSignal()"
+      ></app-login-form>
+      
+      <div class="mt-6 text-center">
+        <p class="text-sm text-text-muted">
+          Don't have an account?
+          <a routerLink="/register" class="font-medium text-primary hover:text-emerald-500 transition-colors">
+            Register here
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

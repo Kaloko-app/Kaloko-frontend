@@ -1,0 +1,289 @@
+<div class="mb-8">
+  <div class="flex items-center justify-between w-full max-w-sm mx-auto">
+    <!-- Step 1 -->
+    <div class="flex flex-col items-center">
+      <div 
+        class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300"
+        [class.bg-primary]="currentStep() >= 1"
+        [class.text-white]="currentStep() >= 1"
+        [class.bg-surface]="currentStep() < 1"
+        [class.text-text-muted]="currentStep() < 1"
+        [class.border-2]="currentStep() === 1"
+        [class.border-accent]="currentStep() === 1"
+      >
+        1
+      </div>
+      <span class="text-xs mt-2 font-medium" [class.text-text-main]="currentStep() >= 1" [class.text-text-muted]="currentStep() < 1">Account</span>
+    </div>
+    
+    <!-- Divider 1 -->
+    <div class="h-[2px] flex-1 mx-2 transition-all duration-300" [class.bg-primary]="currentStep() >= 2" [class.bg-surface]="currentStep() < 2"></div>
+
+    <!-- Step 2 -->
+    <div class="flex flex-col items-center">
+      <div 
+        class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300"
+        [class.bg-primary]="currentStep() >= 2"
+        [class.text-white]="currentStep() >= 2"
+        [class.bg-surface]="currentStep() < 2"
+        [class.text-text-muted]="currentStep() < 2"
+        [class.border-2]="currentStep() === 2"
+        [class.border-accent]="currentStep() === 2"
+      >
+        2
+      </div>
+      <span class="text-xs mt-2 font-medium" [class.text-text-main]="currentStep() >= 2" [class.text-text-muted]="currentStep() < 2">Profile</span>
+    </div>
+
+    <!-- Divider 2 -->
+    <div class="h-[2px] flex-1 mx-2 transition-all duration-300" [class.bg-primary]="currentStep() >= 3" [class.bg-surface]="currentStep() < 3"></div>
+
+    <!-- Step 3 -->
+    <div class="flex flex-col items-center">
+      <div 
+        class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300"
+        [class.bg-primary]="currentStep() >= 3"
+        [class.text-white]="currentStep() >= 3"
+        [class.bg-surface]="currentStep() < 3"
+        [class.text-text-muted]="currentStep() < 3"
+        [class.border-2]="currentStep() === 3"
+        [class.border-accent]="currentStep() === 3"
+      >
+        3
+      </div>
+      <span class="text-xs mt-2 font-medium" [class.text-text-main]="currentStep() >= 3" [class.text-text-muted]="currentStep() < 3">Goals</span>
+    </div>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+  @if (errorMessage()) {
+    <div class="rounded-md bg-red-900/50 p-4 mb-6 border border-red-500">
+      <div class="flex">
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-200">
+            {{ errorMessage() }}
+          </h3>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Step 1: Account -->
+  @if (currentStep() === 1) {
+    <div class="space-y-6">
+      <div>
+        <label for="username" class="block text-sm font-medium text-text-muted">
+          Username
+        </label>
+        <div class="mt-1">
+          <input
+            id="username"
+            type="text"
+            formControlName="username"
+            autocomplete="username"
+            required
+            class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm bg-background text-text-main"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-medium text-text-muted">
+          Email address
+        </label>
+        <div class="mt-1">
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            required
+            class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm bg-background text-text-main"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-text-muted">
+          Password
+        </label>
+        <div class="mt-1">
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            autocomplete="new-password"
+            required
+            class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm bg-background text-text-main"
+          />
+        </div>
+      </div>
+
+      <div class="pt-4">
+        <button
+          type="button"
+          [disabled]="!isStepValid(1)"
+          (click)="nextStep()"
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Next Details
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 2: Personal Info -->
+  @if (currentStep() === 2) {
+    <div class="space-y-6">
+      <div>
+        <label for="gender" class="block text-sm font-medium text-text-muted">
+          Biological Sex (for metabolic math)
+        </label>
+        <div class="mt-1">
+          <select
+            id="gender"
+            formControlName="gender"
+            class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm bg-background text-text-main"
+          >
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+            <option value="UNSPECIFIED">Unspecified</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="age" class="block text-sm font-medium text-text-muted">
+          Age
+        </label>
+        <div class="mt-1">
+          <input
+            id="age"
+            type="number"
+            formControlName="age"
+            required
+            class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm bg-background text-text-main"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="height" class="block text-sm font-medium text-text-muted">
+          Height (in cm)
+        </label>
+        <div class="mt-1">
+          <input
+            id="height"
+            type="number"
+            formControlName="height"
+            required
+            class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm bg-background text-text-main"
+          />
+        </div>
+      </div>
+
+      <div class="flex gap-4 pt-4">
+        <button
+          type="button"
+          (click)="prevStep()"
+          class="w-1/2 flex justify-center py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-text-muted bg-transparent hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          [disabled]="!isStepValid(2)"
+          (click)="nextStep()"
+          class="w-1/2 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Next Goals
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 3: Fitness Goals -->
+  @if (currentStep() === 3) {
+    <div class="space-y-6">
+      <div>
+        <label for="currentWeight" class="block text-sm font-medium text-text-muted">
+          Current Weight (in kg)
+        </label>
+        <div class="mt-1">
+          <input
+            id="currentWeight"
+            type="number"
+            formControlName="currentWeight"
+            required
+            class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm bg-background text-text-main"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="weightGoal" class="block text-sm font-medium text-text-muted">
+          Weight Goal (in kg)
+        </label>
+        <div class="mt-1">
+          <input
+            id="weightGoal"
+            type="number"
+            formControlName="weightGoal"
+            required
+            class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm bg-background text-text-main"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="activityLevel" class="block text-sm font-medium text-text-muted">
+          Activity Level
+        </label>
+        <div class="mt-1">
+          <select
+            id="activityLevel"
+            formControlName="activityLevel"
+            class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm bg-background text-text-main"
+          >
+            <option value="SEDENTARY">Sedentary (Little/no exercise)</option>
+            <option value="LIGHTLY_ACTIVE">Lightly Active (1-3 days/week)</option>
+            <option value="MODERATELY_ACTIVE">Moderately Active (3-5 days/week)</option>
+            <option value="VERY_ACTIVE">Very Active (6-7 days/week)</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="bodyFatPercentage" class="block text-sm font-medium text-text-muted">
+          Body Fat Percentage (Optional)
+        </label>
+        <div class="mt-1">
+          <input
+            id="bodyFatPercentage"
+            type="number"
+            formControlName="bodyFatPercentage"
+            class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm bg-background text-text-main"
+          />
+        </div>
+      </div>
+
+      <div class="flex gap-4 pt-4">
+        <button
+          type="button"
+          (click)="prevStep()"
+          class="w-1/2 flex justify-center py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-text-muted bg-transparent hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+        >
+          Previous
+        </button>
+        <button
+          type="submit"
+          [disabled]="form.invalid"
+          class="w-1/2 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  }
+</form>
