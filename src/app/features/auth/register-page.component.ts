@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 import { AuthService } from './auth.service';
 import { RegisterFormComponent } from './register-form.component';
+import { RegisterFormData } from './auth.model';
 
 @Component({
   selector: 'app-register-page',
@@ -17,7 +18,7 @@ export class RegisterPageComponent {
 
   public errorSignal = signal<string | null>(null);
 
-  onRegister(formData: any) {
+  onRegister(formData: RegisterFormData) {
     const registerData = {
       username: formData.username,
       email: formData.email,
@@ -41,7 +42,7 @@ export class RegisterPageComponent {
       })
     ).subscribe({
       next: () => {
-        this.router.navigate(['/']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err: any) => {
         console.error('Registration failed', err);

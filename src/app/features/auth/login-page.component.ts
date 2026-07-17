@@ -20,7 +20,7 @@ export class LoginPageComponent {
   onLogin(credentials: LoginRequestDTO) {
     this.authService.login(credentials).subscribe({
       next: () => {
-        this.router.navigate(['/']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err: any) => {
         console.error('Login failed', err);

@@ -1,4 +1,15 @@
-export interface AuthModel {}
+export interface RegisterFormData {
+  username: string;
+  email: string;
+  password: string;
+  gender: 'MALE' | 'FEMALE' | 'UNSPECIFIED';
+  age: number;
+  height: number;
+  currentWeight: number;
+  weightGoal: number;
+  activityLevel: 'SEDENTARY' | 'LIGHTLY_ACTIVE' | 'MODERATELY_ACTIVE' | 'VERY_ACTIVE';
+  bodyFatPercentage?: number | null;
+}
 
 export interface LoginRequestDTO {
   username: string;

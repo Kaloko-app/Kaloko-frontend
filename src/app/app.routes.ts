@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -14,6 +15,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     title: 'Dashboard - Kaloko',
+    canActivate: [authGuard],
     loadComponent: () => import('./features/dashboard/dashboard-page.component').then(m => m.DashboardPageComponent)
   },
   {

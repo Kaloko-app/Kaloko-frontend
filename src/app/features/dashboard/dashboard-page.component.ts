@@ -1,5 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
@@ -9,17 +8,10 @@ import { AuthService } from '../auth/auth.service';
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.css',
 })
-export class DashboardPageComponent implements OnInit {
+export class DashboardPageComponent {
   private authService = inject(AuthService);
-  private router = inject(Router);
 
   public user = this.authService.currentUser;
-
-  ngOnInit() {
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
-    }
-  }
 
   logout() {
     this.authService.logout();

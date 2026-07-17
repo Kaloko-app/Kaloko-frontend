@@ -1,5 +1,6 @@
 import { Component, output, inject, input, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RegisterFormData } from './auth.model';
 
 @Component({
   selector: 'app-register-form',
@@ -9,7 +10,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
   styles: ``
 })
 export class RegisterFormComponent {
-  public register = output<any>();
+  public register = output<RegisterFormData>();
   public errorMessage = input<string | null>(null);
 
   private fb = inject(NonNullableFormBuilder);
@@ -62,7 +63,7 @@ export class RegisterFormComponent {
 
   onSubmit() {
     if (this.form.valid) {
-      this.register.emit(this.form.getRawValue());
+      this.register.emit(this.form.getRawValue() as unknown as RegisterFormData);
     }
   }
 }
