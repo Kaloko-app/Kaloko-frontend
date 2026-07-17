@@ -19,6 +19,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/dashboard/dashboard-page.component').then(m => m.DashboardPageComponent)
   },
   {
+    path: 'nutrition',
+    title: 'Nutrition - Kaloko',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/nutrition/nutrition-page.component').then(m => m.NutritionPageComponent)
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'
