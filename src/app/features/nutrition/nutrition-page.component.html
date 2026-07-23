@@ -71,10 +71,15 @@
             <div class="p-4 text-center text-slate-400 text-sm">No foods logged.</div>
           }
           @for (log of meal.logs; track log.id) {
-            <div class="p-4 pl-6 border-l-2 border-transparent hover:border-indigo-500 hover:bg-slate-800/20 transition-all">
-              <div class="flex justify-between items-center">
+            <div class="border-l-2 border-transparent transition-all">
+              <div (click)="toggleEditLog(log)" class="p-4 pl-6 cursor-pointer hover:bg-slate-800/30 flex justify-between items-center transition-colors">
                 <div class="flex-1">
-                  <h4 class="text-sm font-semibold text-slate-300 mb-0.5">{{ log.foodName }}</h4>
+                  <h4 class="text-sm font-semibold text-slate-300 mb-0.5 flex items-center space-x-2">
+                    <span>{{ log.foodName }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-slate-500 transition-transform" [class.rotate-180]="editingLogId() === log.id" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </h4>
                   <div class="text-xs text-slate-400">{{ log.grams }}g</div>
                 </div>
                 
@@ -87,6 +92,68 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Inline Dropdown Drawer for Editing / Deleting -->
+              @if (editingLogId() === log.id) {
+                <div class="px-6 py-4 bg-slate-900/95 border-t border-b border-slate-800/80 space-y-3 animate-fade-in">
+                  <!-- Live real-time macros preview -->
+                  <div class="bg-slate-950 border border-slate-800 rounded-lg p-2.5 flex justify-between items-center">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">New Total</span>
+                      <span class="text-base font-bold text-white">{{ calculatedEditMacros().calories }} <span class="text-[10px] text-slate-400 font-normal">kcal</span></span>
+                    </div>
+                    <div class="flex space-x-3 text-right">
+                      <div>
+                        <span class="text-[10px] font-bold text-rose-400 block">PRO</span>
+                        <span class="text-xs font-semibold text-slate-200">{{ calculatedEditMacros().protein }}g</span>
+                      </div>
+                      <div>
+                        <span class="text-[10px] font-bold text-amber-400 block">CARB</span>
+                        <span class="text-xs font-semibold text-slate-200">{{ calculatedEditMacros().carbs }}g</span>
+                      </div>
+                      <div>
+                        <span class="text-[10px] font-bold text-emerald-400 block">FAT</span>
+                        <span class="text-xs font-semibold text-slate-200">{{ calculatedEditMacros().fats }}g</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="space-y-3 pt-1">
+                    <div>
+                      <label class="block text-[11px] font-medium text-slate-400 mb-1">Amount (grams)</label>
+                      <input 
+                        type="number" 
+                        [ngModel]="editGrams()" 
+                        (ngModelChange)="editGrams.set($event)"
+                        min="1"
+                        class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
+                      >
+                    </div>
+
+                    <div class="flex space-x-2">
+                      <button 
+                        (click)="saveLogEdit(log.id)" 
+                        class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm flex items-center justify-center space-x-1"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Save</span>
+                      </button>
+
+                      <button 
+                        (click)="deleteLog(log.id)" 
+                        class="py-2 px-4 bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 rounded-lg text-xs font-semibold transition-colors flex items-center space-x-1 shrink-0"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
             </div>
           }
         </div>
@@ -106,11 +173,11 @@
   
   <!-- Search Modal (Mobile Bottom Sheet) -->
   @if (showSearchModal()) {
-    <div class="fixed inset-0 z-[100] flex flex-col justify-end items-center bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-      <div class="w-full max-w-lg bg-slate-900 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col h-[85vh] animate-slide-up">
-        <!-- Handle for dragging (visual only) -->
-        <div class="w-full flex justify-center pt-3 pb-1 bg-slate-900">
-          <div class="w-12 h-1.5 bg-slate-700 rounded-full"></div>
+    <div (click)="showSearchModal.set(false)" class="fixed inset-0 z-[100] flex flex-col justify-end items-center bg-slate-950/80 backdrop-blur-sm animate-fade-in cursor-pointer">
+      <div (click)="$event.stopPropagation()" class="w-full max-w-lg bg-slate-900 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col h-[85vh] animate-slide-up cursor-default">
+        <!-- Handle for dragging/closing -->
+        <div (click)="showSearchModal.set(false)" class="w-full flex justify-center pt-3 pb-2 bg-slate-900 cursor-pointer group">
+          <div class="w-12 h-1.5 bg-slate-700 group-hover:bg-indigo-500 rounded-full transition-colors"></div>
         </div>
         
         <div class="px-6 py-3 border-b border-slate-800 flex justify-between items-center bg-slate-900">

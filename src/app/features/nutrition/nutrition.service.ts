@@ -28,4 +28,20 @@ export class NutritionService {
   setDailyLogs(logs: FoodLogResponseDTO[]) {
     this.dailyLogs.set(logs);
   }
+
+  fetchFavoriteFoods(): Observable<Food[]> {
+    return this.http.get<Food[]>('/api/foods/favorites');
+  }
+
+  toggleFavoriteFood(foodId: number): Observable<boolean> {
+    return this.http.post<boolean>(`/api/foods/${foodId}/favorite`, {});
+  }
+
+  updateFoodLog(id: number, grams: number): Observable<FoodLogResponseDTO> {
+    return this.http.put<FoodLogResponseDTO>(`/api/food-logs/${id}?grams=${grams}`, {});
+  }
+
+  deleteFoodLog(id: number): Observable<void> {
+    return this.http.delete<void>(`/api/food-logs/${id}`);
+  }
 }

@@ -24,6 +24,26 @@ export class NutritionPageComponent implements OnInit {
   public searchMealContext = signal<string>('Breakfast');
   public showSearchModal = signal<boolean>(false);
   
+  // Inline editing state for logged food item dropdown
+  public editingLogId = signal<number | null>(null);
+  public editingLog = signal<FoodLogResponseDTO | null>(null);
+  public editGrams = signal<number>(100);
+
+  public calculatedEditMacros = computed(() => {
+    const log = this.editingLog();
+    if (!log || !log.grams || log.grams <= 0) {
+      return { calories: 0, protein: 0, carbs: 0, fats: 0 };
+    }
+    const currentGrams = this.editGrams() || 0;
+    const ratio = currentGrams / log.grams;
+    return {
+      calories: Math.round(log.calories * ratio),
+      protein: Math.round(log.protein * ratio),
+      carbs: Math.round(log.carbs * ratio),
+      fats: Math.round(log.fats * ratio)
+    };
+  });
+
   public dailyLogs = this.nutritionService.dailyLogs;
 
   public dailySummary = computed(() => {
@@ -122,5 +142,39 @@ export class NutritionPageComponent implements OnInit {
 
   onLogAdded() {
     this.loadLogsForDate(this.currentDate());
+  }
+
+  toggleEditLog(log: FoodLogResponseDTO) {
+    if (this.editingLogId() === log.id) {
+      this.editingLogId.set(null);
+      this.editingLog.set(null);
+    } else {
+      this.editingLogId.set(log.id);
+      this.editingLog.set(log);
+      this.editGrams.set(log.grams);
+    }
+  }
+
+  saveLogEdit(logId: number) {
+    if (this.editGrams() <= 0) return;
+    this.nutritionService.updateFoodLog(logId, this.editGrams()).subscribe({
+      next: () => {
+        this.editingLogId.set(null);
+        this.editingLog.set(null);
+        this.loadLogsForDate(this.currentDate());
+      },
+      error: (err) => console.error('Failed to update log', err)
+    });
+  }
+
+  deleteLog(logId: number) {
+    this.nutritionService.deleteFoodLog(logId).subscribe({
+      next: () => {
+        this.editingLogId.set(null);
+        this.editingLog.set(null);
+        this.loadLogsForDate(this.currentDate());
+      },
+      error: (err) => console.error('Failed to delete log', err)
+    });
   }
 }

@@ -9,6 +9,8 @@ export interface Food {
   micronutrients: Record<string, string>;
   isPublic: boolean;
   createdById?: number;
+  servingSize?: number;
+  servingUnit?: string;
 }
 
 export interface FoodRequestDTO {
@@ -21,6 +23,8 @@ export interface FoodRequestDTO {
   micronutrients?: Record<string, string>;
   isPublic: boolean;
   createdById?: number;
+  servingSize?: number;
+  servingUnit?: string;
 }
 
 export interface FoodLogRequestDTO {

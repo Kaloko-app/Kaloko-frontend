@@ -1,179 +1,523 @@
-<div class="bg-slate-900 w-full flex flex-col h-full">
-  <h3 class="p-6 text-lg font-semibold text-slate-200 border-b border-slate-800 flex items-center justify-between">
-    <div class="flex items-center space-x-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      <span>Log Food</span>
+<div class="bg-slate-900 w-full flex flex-col h-full p-4 md:p-6 overflow-y-auto">
+  @if (isCreating()) {
+    <!-- Create Mode Header -->
+    <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+      <h3 class="text-base font-bold text-white">
+        {{ itemType() === 'food' ? 'Create Custom Food' : 'Create Custom Recipe' }}
+      </h3>
+      <button (click)="toggleCreateMode()" class="text-xs text-slate-400 hover:text-white px-2.5 py-1 bg-slate-800 rounded-lg transition-colors">Cancel</button>
     </div>
-    @if (isCreating()) {
-      <button (click)="toggleCreateMode()" class="text-xs text-slate-400 hover:text-white transition-colors">Cancel</button>
-    }
-  </h3>
 
-  <div class="space-y-4">
-    @if (!isCreating()) {
-      <!-- Search Input -->
-      <div class="relative">
-        <label class="block text-xs font-medium text-slate-400 mb-1">Search Database</label>
-        <input 
-          type="text" 
-          [value]="searchQuery()" 
-          (input)="onSearchChange($event)"
-          placeholder="E.g. Oats, Banana..." 
-          class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+    <!-- Create Food / Recipe Form -->
+    <div class="space-y-3 bg-slate-950/50 p-4 rounded-xl border border-slate-800">
+      <div class="flex space-x-2 mb-2">
+        <button 
+          (click)="itemType.set('food')" 
+          class="flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all"
+          [class.bg-indigo-600]="itemType() === 'food'"
+          [class.border-indigo-500]="itemType() === 'food'"
+          [class.text-white]="itemType() === 'food'"
+          [class.bg-slate-900]="itemType() !== 'food'"
+          [class.border-slate-800]="itemType() !== 'food'"
+          [class.text-slate-400]="itemType() !== 'food'"
         >
+          Food
+        </button>
+        <button 
+          (click)="itemType.set('recipe')" 
+          class="flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all"
+          [class.bg-indigo-600]="itemType() === 'recipe'"
+          [class.border-indigo-500]="itemType() === 'recipe'"
+          [class.text-white]="itemType() === 'recipe'"
+          [class.bg-slate-900]="itemType() !== 'recipe'"
+          [class.border-slate-800]="itemType() !== 'recipe'"
+          [class.text-slate-400]="itemType() !== 'recipe'"
+        >
+          Recipe
+        </button>
+      </div>
+
+      <h4 class="text-xs font-medium text-indigo-400">Nutritional Info (per 100g)</h4>
+      
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1">
+          {{ itemType() === 'food' ? 'Food Name' : 'Recipe Name' }}
+        </label>
+        <input type="text" [ngModel]="newFood().name" (ngModelChange)="updateNewFoodField('name', $event)" [placeholder]="itemType() === 'food' ? 'E.g. Protein Yogurt' : 'E.g. Oatmeal Smoothie'" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500">
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Calories (kcal)</label>
+          <input type="number" [ngModel]="newFood().calories" (ngModelChange)="updateNewFoodField('calories', $event)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Protein (g)</label>
+          <input type="number" [ngModel]="newFood().protein" (ngModelChange)="updateNewFoodField('protein', $event)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Carbs (g)</label>
+          <input type="number" [ngModel]="newFood().carbs" (ngModelChange)="updateNewFoodField('carbs', $event)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Fats (g)</label>
+          <input type="number" [ngModel]="newFood().fats" (ngModelChange)="updateNewFoodField('fats', $event)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500">
+        </div>
+      </div>
+
+      <!-- Serving Unit Definition -->
+      <div class="pt-2 border-t border-slate-800 grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Serving Size (g)</label>
+          <input type="number" [ngModel]="newFood().servingSize" (ngModelChange)="updateNewFoodField('servingSize', $event)" placeholder="E.g. 125" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Unit Name</label>
+          <input type="text" [ngModel]="newFood().servingUnit" (ngModelChange)="updateNewFoodField('servingUnit', $event)" placeholder="E.g. yogurt pot, egg" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500">
+        </div>
+      </div>
+
+      <!-- Micronutrients Editor -->
+      <div class="pt-2 border-t border-slate-800">
+        <label class="block text-xs font-medium text-slate-400 mb-2">Micronutrients (Optional)</label>
         
-        <!-- Search Results Dropdown -->
-        @if (searchResults().length > 0) {
-          <div class="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl max-h-60 overflow-y-auto">
-            @for (food of searchResults(); track food.id) {
-              <button 
-                (click)="selectFood(food)"
-                class="w-full text-left px-4 py-3 hover:bg-slate-700 focus:bg-slate-700 outline-none transition-colors border-b border-slate-700/50 last:border-0"
-              >
-                <div class="font-medium text-slate-200">{{ food.name }}</div>
-                <div class="text-xs text-slate-400 space-x-2 mt-0.5">
-                  <span class="text-indigo-400/80">{{ food.calories }} kcal</span>
-                  <span>{{ food.protein }}g P</span>
-                  <span>{{ food.carbs }}g C</span>
-                  <span>{{ food.fats }}g F</span>
-                </div>
-                <!-- Micronutrients Dropdown Visual -->
-                @if (food.micronutrients && (food.micronutrients | keyvalue).length > 0) {
-                  <div class="text-[10px] text-slate-500 mt-1 flex flex-wrap gap-2">
-                    @for (micro of food.micronutrients | keyvalue; track micro.key) {
-                      <span class="bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700">{{ micro.key }}: {{ micro.value }}</span>
-                    }
-                  </div>
-                }
-              </button>
+        <div class="flex space-x-2 mb-2">
+          <input type="text" [ngModel]="newMicroKey()" (ngModelChange)="newMicroKey.set($event)" placeholder="E.g. Vitamin C" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white outline-none">
+          <input type="text" [ngModel]="newMicroValue()" (ngModelChange)="newMicroValue.set($event)" placeholder="E.g. 50mg" class="w-24 bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white outline-none">
+          <button (click)="addMicronutrient()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded text-xs font-bold">+</button>
+        </div>
+
+        @if (newFood().micronutrients && (newFood().micronutrients! | keyvalue)?.length > 0) {
+          <div class="flex flex-col space-y-1 mt-2">
+            @for (micro of newFood().micronutrients | keyvalue; track micro.key) {
+              <div class="flex items-center justify-between bg-slate-900 px-2 py-1 rounded border border-slate-700 text-xs">
+                <span class="text-slate-300">{{ micro.key }}: <span class="text-indigo-400">{{ micro.value }}</span></span>
+                <button (click)="removeMicronutrient(micro.key)" class="text-slate-500 hover:text-red-400">×</button>
+              </div>
             }
-          </div>
-        } @else if (hasSearched() && searchQuery().length > 0 && !selectedFood()) {
-          <!-- Empty State -->
-          <div class="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-4 text-center">
-            <p class="text-sm text-slate-400 mb-3">No foods found matching "{{ searchQuery() }}"</p>
-            <button (click)="toggleCreateMode()" class="w-full bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium py-2 rounded transition-colors">
-              + Create Custom Food
-            </button>
           </div>
         }
       </div>
 
-      @if (selectedFood()) {
-        <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
-          <p class="text-sm text-indigo-300">Selected: <span class="font-bold">{{ selectedFood()?.name }}</span></p>
-        </div>
-        
-        <div class="flex space-x-4 mb-4">
-          <div class="flex-1">
-            <label class="block text-xs font-medium text-slate-400 mb-1">Amount (grams)</label>
-            <input 
-              type="number" 
-              [ngModel]="grams()" 
-              (ngModelChange)="grams.set($event)"
-              min="1"
-              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none"
-            >
+      <!-- Visibility Toggle -->
+      <div class="pt-2 border-t border-slate-800">
+        <label class="flex items-center space-x-3 cursor-pointer group">
+          <div class="relative">
+            <input type="checkbox" class="sr-only" [ngModel]="newFood().isPublic" (ngModelChange)="updateNewFoodField('isPublic', $event)">
+            <div class="block w-10 h-6 bg-slate-800 rounded-full transition-colors" [class.bg-indigo-600]="newFood().isPublic"></div>
+            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform" [class.translate-x-4]="newFood().isPublic"></div>
           </div>
-          
-          @if (currentMealContext() === 'All') {
-            <div class="flex-1">
-              <label class="block text-xs font-medium text-slate-400 mb-1">Select Meal</label>
-              <select 
-                [ngModel]="selectedMealToLog()" 
-                (ngModelChange)="selectedMealToLog.set($event)"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none"
-              >
-                <option value="Breakfast">Breakfast</option>
-                <option value="Lunch">Lunch</option>
-                <option value="Dinner">Dinner</option>
-                <option value="Snack">Snack</option>
-              </select>
-            </div>
-          }
-        </div>        <button 
-          (click)="addFoodLog()"
-          [disabled]="!selectedFood() || grams() <= 0"
-          class="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-colors shadow-lg shadow-indigo-500/20"
+          <div>
+            <div class="text-sm font-semibold text-slate-300 group-hover:text-white transition-colors">Make visible to everyone</div>
+            <div class="text-xs text-slate-500">Other users will be able to search and use this.</div>
+          </div>
+        </label>
+      </div>
+
+      <button 
+        (click)="createNewFood()"
+        [disabled]="!newFood().name || newFood().calories < 0"
+        class="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-colors shadow-lg shadow-emerald-600/20"
+      >
+        Save to Database
+      </button>
+    </div>
+  } @else {
+    <!-- TOP CATEGORY BUTTONS (Alimento | Receta) -->
+    <div class="flex space-x-2 mb-3">
+      <button 
+        (click)="itemType.set('food')" 
+        class="flex-1 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center justify-center space-x-1"
+        [class.bg-indigo-600]="itemType() === 'food'"
+        [class.border-indigo-500]="itemType() === 'food'"
+        [class.text-white]="itemType() === 'food'"
+        [class.bg-slate-950]="itemType() !== 'food'"
+        [class.border-slate-800]="itemType() !== 'food'"
+        [class.text-slate-400]="itemType() !== 'food'"
+      >
+        <span>🍎 Food</span>
+      </button>
+      <button 
+        (click)="itemType.set('recipe')" 
+        class="flex-1 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center justify-center space-x-1"
+        [class.bg-indigo-600]="itemType() === 'recipe'"
+        [class.border-indigo-500]="itemType() === 'recipe'"
+        [class.text-white]="itemType() === 'recipe'"
+        [class.bg-slate-950]="itemType() !== 'recipe'"
+        [class.border-slate-800]="itemType() !== 'recipe'"
+        [class.text-slate-400]="itemType() !== 'recipe'"
+      >
+        <span>🍳 Recipe</span>
+      </button>
+    </div>
+
+    <!-- 1. ALWAYS-PINNED SEARCH INPUT BAR -->
+    <div class="mb-3">
+      <div class="relative">
+        <input 
+          type="text" 
+          [value]="searchQuery()" 
+          (input)="onSearchChange($event)"
+          [placeholder]="itemType() === 'food' ? 'Search foods (e.g. Oats, Banana...)' : 'Search recipes (e.g. Smoothie, Pancakes...)'" 
+          class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
         >
-          Add to Log
-        </button>
-      }
-    } @else {
-      <!-- Create Food Form -->
-      <div class="space-y-3 bg-slate-950/50 p-4 rounded-xl border border-slate-800">
-        <h4 class="text-sm font-medium text-indigo-400 mb-2">Create New Food (per 100g)</h4>
-        
-        <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1">Food Name</label>
-          <input type="text" [ngModel]="newFood().name" (ngModelChange)="updateNewFoodField('name', $event)" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none">
-        </div>
-        
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Calories (kcal)</label>
-            <input type="number" [ngModel]="newFood().calories" (ngModelChange)="updateNewFoodField('calories', $event)" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Protein (g)</label>
-            <input type="number" [ngModel]="newFood().protein" (ngModelChange)="updateNewFoodField('protein', $event)" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Carbs (g)</label>
-            <input type="number" [ngModel]="newFood().carbs" (ngModelChange)="updateNewFoodField('carbs', $event)" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Fats (g)</label>
-            <input type="number" [ngModel]="newFood().fats" (ngModelChange)="updateNewFoodField('fats', $event)" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none">
-          </div>
-        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        @if (searchQuery().length > 0) {
+          <button (click)="searchQuery.set(''); searchResults.set([]); selectedFood.set(null)" class="absolute right-3 top-2 text-slate-400 hover:text-white text-lg font-bold">
+            ×
+          </button>
+        }
+      </div>
+    </div>
 
-        <!-- Micronutrients Editor -->
-        <div class="pt-2 border-t border-slate-800">
-          <label class="block text-xs font-medium text-slate-400 mb-2">Micronutrients (Optional)</label>
-          
-          <div class="flex space-x-2 mb-2">
-            <input type="text" [ngModel]="newMicroKey()" (ngModelChange)="newMicroKey.set($event)" placeholder="E.g. Vitamin C" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white outline-none">
-            <input type="text" [ngModel]="newMicroValue()" (ngModelChange)="newMicroValue.set($event)" placeholder="E.g. 50mg" class="w-24 bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white outline-none">
-            <button (click)="addMicronutrient()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1.5 rounded text-xs">+</button>
+    <!-- 2. FILTER TABS (All / Recents / Favorites) -->
+    <div class="bg-slate-950 border border-slate-800 p-1 rounded-xl flex space-x-1 mb-4">
+      <button 
+        (click)="activeTab.set('all')" 
+        class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center space-x-1.5"
+        [class.bg-indigo-600]="activeTab() === 'all'"
+        [class.text-white]="activeTab() === 'all'"
+        [class.text-slate-400]="activeTab() !== 'all'"
+        [class.hover:text-slate-200]="activeTab() !== 'all'"
+      >
+        <span>All</span>
+      </button>
+
+      <button 
+        (click)="activeTab.set('recents')" 
+        class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center space-x-1.5"
+        [class.bg-indigo-600]="activeTab() === 'recents'"
+        [class.text-white]="activeTab() === 'recents'"
+        [class.text-slate-400]="activeTab() !== 'recents'"
+        [class.hover:text-slate-200]="activeTab() !== 'recents'"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Recents</span>
+      </button>
+
+      <button 
+        (click)="activeTab.set('favorites')" 
+        class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center space-x-1.5"
+        [class.bg-indigo-600]="activeTab() === 'favorites'"
+        [class.text-white]="activeTab() === 'favorites'"
+        [class.text-slate-400]="activeTab() !== 'favorites'"
+        [class.hover:text-slate-200]="activeTab() !== 'favorites'"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <span>Favorites</span>
+      </button>
+    </div>
+
+    <!-- 3. MAIN CONTENT BASED ON TAB & SEARCH QUERY -->
+    @if (activeTab() === 'all') {
+      @if (searchQuery().length > 0) {
+        <!-- Global Database Search Results -->
+        @if (searchResults().length > 0) {
+          <div class="space-y-1 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800/60 max-h-64 overflow-y-auto">
+            @for (food of searchResults(); track food.id) {
+              <div 
+                (click)="selectFood(food)"
+                class="p-3 hover:bg-slate-800/60 cursor-pointer flex justify-between items-center transition-colors"
+              >
+                <div class="flex-1 pr-2">
+                  <div class="font-semibold text-slate-200 text-sm flex items-center space-x-1.5">
+                    <span>{{ food.name }}</span>
+                    @if (food.servingUnit) {
+                      <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-normal">{{ food.servingUnit }}</span>
+                    }
+                  </div>
+                  <div class="text-xs space-x-2 mt-0.5 font-medium">
+                    <span class="text-indigo-400">{{ food.calories }} kcal</span>
+                    <span class="text-rose-400">{{ food.protein }}g P</span>
+                    <span class="text-amber-400">{{ food.carbs }}g C</span>
+                    <span class="text-emerald-400">{{ food.fats }}g F</span>
+                  </div>
+                </div>
+                <button (click)="toggleFavorite(food, $event)" class="p-1.5 text-slate-500 hover:text-amber-400 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" [attr.fill]="isFavorite(food) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" [class.text-amber-400]="isFavorite(food)">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+        } @else if (hasSearched() && !selectedFood()) {
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-center">
+            <p class="text-xs text-slate-400 mb-3">No {{ itemType() === 'food' ? 'foods' : 'recipes' }} found matching "{{ searchQuery() }}"</p>
+            <button (click)="toggleCreateMode()" class="w-full bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold py-2 rounded-lg transition-colors">
+              + Create Custom {{ itemType() === 'food' ? 'Food' : 'Recipe' }}
+            </button>
+          </div>
+        }
+      } @else {
+        <!-- Overview (Recents + Favorites) -->
+        <div class="mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-semibold text-slate-400">Recently Logged</span>
+            <button (click)="toggleCreateMode()" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">+ Custom {{ itemType() === 'food' ? 'Food' : 'Recipe' }}</button>
           </div>
 
-          @if (newFood().micronutrients && (newFood().micronutrients! | keyvalue)?.length > 0) {
-            <div class="flex flex-col space-y-1 mt-2">
-              @for (micro of newFood().micronutrients | keyvalue; track micro.key) {
-                <div class="flex items-center justify-between bg-slate-900 px-2 py-1 rounded border border-slate-700 text-xs">
-                  <span class="text-slate-300">{{ micro.key }}: <span class="text-indigo-400">{{ micro.value }}</span></span>
-                  <button (click)="removeMicronutrient(micro.key)" class="text-slate-500 hover:text-red-400">×</button>
+          @if (recents().length === 0) {
+            <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 text-center">
+              <p class="text-xs text-slate-500 font-medium">No recent items logged yet</p>
+            </div>
+          } @else {
+            <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800/60">
+              @for (food of recents(); track food.id) {
+                <div 
+                  (click)="selectFood(food)"
+                  class="p-3 hover:bg-slate-800/60 cursor-pointer flex justify-between items-center transition-colors"
+                >
+                  <div class="flex-1 pr-2">
+                    <div class="font-semibold text-slate-200 text-sm flex items-center space-x-1.5">
+                      <span>{{ food.name }}</span>
+                      @if (food.servingUnit) {
+                        <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-normal">{{ food.servingUnit }}</span>
+                      }
+                    </div>
+                    <div class="text-xs space-x-2 mt-0.5 font-medium">
+                      <span class="text-indigo-400">{{ food.calories }} kcal</span>
+                      <span class="text-rose-400">{{ food.protein }}g P</span>
+                      <span class="text-amber-400">{{ food.carbs }}g C</span>
+                      <span class="text-emerald-400">{{ food.fats }}g F</span>
+                    </div>
+                  </div>
+                  <button (click)="toggleFavorite(food, $event)" class="p-1.5 text-slate-500 hover:text-amber-400 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" [attr.fill]="isFavorite(food) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" [class.text-amber-400]="isFavorite(food)">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                  </button>
                 </div>
               }
             </div>
           }
         </div>
+      }
+    }
 
-        <div class="pt-2 border-t border-slate-800">
-          <label class="flex items-center space-x-3 cursor-pointer group">
-            <div class="relative">
-              <input type="checkbox" class="sr-only" [ngModel]="newFood().isPublic" (ngModelChange)="updateNewFoodField('isPublic', $event)">
-              <div class="block w-10 h-6 bg-slate-800 rounded-full transition-colors" [class.bg-indigo-600]="newFood().isPublic"></div>
-              <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform" [class.translate-x-4]="newFood().isPublic"></div>
+    <!-- TAB: RECENTS (Filters strictly within Recents) -->
+    @if (activeTab() === 'recents') {
+      <div class="space-y-2">
+        <label class="block text-xs font-medium text-slate-400 mb-1">Recently Logged Foods</label>
+        @if (filteredRecents().length === 0) {
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-6 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            @if (searchQuery().length > 0) {
+              <p class="text-xs text-slate-400 font-medium">No recent foods matching "{{ searchQuery() }}"</p>
+            } @else {
+              <p class="text-xs text-slate-400 font-medium">No recent foods logged yet</p>
+            }
+          </div>
+        } @else {
+          <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800/60">
+            @for (food of filteredRecents(); track food.id) {
+              <div 
+                (click)="selectFood(food)"
+                class="p-3 hover:bg-slate-800/60 cursor-pointer flex justify-between items-center transition-colors"
+              >
+                <div class="flex-1 pr-2">
+                  <div class="font-semibold text-slate-200 text-sm flex items-center space-x-1.5">
+                    <span>{{ food.name }}</span>
+                    @if (food.servingUnit) {
+                      <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-normal">{{ food.servingUnit }}</span>
+                    }
+                  </div>
+                  <div class="text-xs space-x-2 mt-0.5 font-medium">
+                    <span class="text-indigo-400">{{ food.calories }} kcal</span>
+                    <span class="text-rose-400">{{ food.protein }}g P</span>
+                    <span class="text-amber-400">{{ food.carbs }}g C</span>
+                    <span class="text-emerald-400">{{ food.fats }}g F</span>
+                  </div>
+                </div>
+                <button (click)="toggleFavorite(food, $event)" class="p-1.5 text-slate-500 hover:text-amber-400 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" [attr.fill]="isFavorite(food) ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" [class.text-amber-400]="isFavorite(food)">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- TAB: FAVORITES (Filters strictly within Favorites) -->
+    @if (activeTab() === 'favorites') {
+      <div class="space-y-2">
+        <label class="block text-xs font-medium text-slate-400 mb-1">Favorite Foods</label>
+        @if (filteredFavorites().length === 0) {
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-6 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-500/40 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+            @if (searchQuery().length > 0) {
+              <p class="text-xs text-slate-400 font-medium">No favorites matching "{{ searchQuery() }}"</p>
+            } @else {
+              <p class="text-xs text-slate-400 font-medium">No favorite foods saved yet</p>
+            }
+          </div>
+        } @else {
+          <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800/60">
+            @for (food of filteredFavorites(); track food.id) {
+              <div 
+                (click)="selectFood(food)"
+                class="p-3 hover:bg-slate-800/60 cursor-pointer flex justify-between items-center transition-colors"
+              >
+                <div class="flex-1 pr-2">
+                  <div class="font-semibold text-slate-200 text-sm flex items-center space-x-1.5">
+                    <span>{{ food.name }}</span>
+                    @if (food.servingUnit) {
+                      <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-normal">{{ food.servingUnit }}</span>
+                    }
+                  </div>
+                  <div class="text-xs space-x-2 mt-0.5 font-medium">
+                    <span class="text-indigo-400">{{ food.calories }} kcal</span>
+                    <span class="text-rose-400">{{ food.protein }}g P</span>
+                    <span class="text-amber-400">{{ food.carbs }}g C</span>
+                    <span class="text-emerald-400">{{ food.fats }}g F</span>
+                  </div>
+                </div>
+                <button (click)="toggleFavorite(food, $event)" class="p-1.5 text-amber-400 hover:text-slate-500 transition-colors" title="Remove Favorite">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- 5. SELECTED FOOD & REAL-TIME MACROS CARD (Second Photo in User Prompt) -->
+    @if (selectedFood()) {
+      <div class="mt-4 p-4 bg-slate-950 border border-indigo-500/40 rounded-xl shadow-lg space-y-3 animate-fade-in">
+        <div class="flex justify-between items-start border-b border-slate-800 pb-2">
+          <div>
+            <span class="text-[10px] uppercase font-bold tracking-wider text-indigo-400">Selected Food</span>
+            <h4 class="text-base font-bold text-white">{{ selectedFood()?.name }}</h4>
+          </div>
+          <button (click)="selectedFood.set(null)" class="text-xs text-slate-400 hover:text-white bg-slate-900 px-2 py-1 rounded border border-slate-800">Change</button>
+        </div>
+
+        <!-- LIVE REAL-TIME MACROS SUMMARY DISPLAY -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-lg p-3 flex justify-between items-center">
+          <div>
+            <span class="text-xs text-slate-400 block font-medium">Calculated</span>
+            <span class="text-xl font-black text-white">{{ calculatedMacros().calories }} <span class="text-xs text-slate-400 font-normal">kcal</span></span>
+          </div>
+          <div class="flex space-x-3 text-right">
+            <div>
+              <span class="text-[10px] font-bold text-rose-400 block">PRO</span>
+              <span class="text-xs font-semibold text-slate-200">{{ calculatedMacros().protein }}g</span>
             </div>
             <div>
-              <div class="text-sm font-semibold text-slate-300 group-hover:text-white transition-colors">Make visible to everyone</div>
-              <div class="text-xs text-slate-500">Other users will be able to search and use this food.</div>
+              <span class="text-[10px] font-bold text-amber-400 block">CARB</span>
+              <span class="text-xs font-semibold text-slate-200">{{ calculatedMacros().carbs }}g</span>
             </div>
-          </label>
+            <div>
+              <span class="text-[10px] font-bold text-emerald-400 block">FAT</span>
+              <span class="text-xs font-semibold text-slate-200">{{ calculatedMacros().fats }}g</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SERVING MODE / UNIT SELECTOR & QUANTITY INPUT -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <label class="block text-xs font-medium text-slate-400">Portion / Unit Type</label>
+            @if (selectedFood()?.servingSize && selectedFood()?.servingUnit) {
+              <div class="flex bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs">
+                <button 
+                  (click)="servingUnitMode.set('grams')" 
+                  class="px-2 py-0.5 rounded transition-all font-semibold"
+                  [class.bg-indigo-600]="servingUnitMode() === 'grams'"
+                  [class.text-white]="servingUnitMode() === 'grams'"
+                  [class.text-slate-400]="servingUnitMode() !== 'grams'"
+                >
+                  Grams (g)
+                </button>
+                <button 
+                  (click)="servingUnitMode.set('serving')" 
+                  class="px-2 py-0.5 rounded transition-all font-semibold"
+                  [class.bg-indigo-600]="servingUnitMode() === 'serving'"
+                  [class.text-white]="servingUnitMode() === 'serving'"
+                  [class.text-slate-400]="servingUnitMode() !== 'serving'"
+                >
+                  Unit / Portion
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="flex space-x-3">
+            @if (servingUnitMode() === 'serving' && selectedFood()?.servingSize) {
+              <div class="flex-1">
+                <label class="block text-[11px] text-slate-400 mb-1">
+                  Quantity ({{ selectedFood()?.servingUnit || 'unit' }})
+                </label>
+                <input 
+                  type="number" 
+                  [ngModel]="servingQuantity()" 
+                  (ngModelChange)="servingQuantity.set($event)"
+                  min="0.1"
+                  step="0.5"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                >
+                <span class="text-[10px] text-slate-500 mt-1 block">
+                  = {{ effectiveGrams() }}g total ({{ selectedFood()?.servingSize }}g/unit)
+                </span>
+              </div>
+            } @else {
+              <div class="flex-1">
+                <label class="block text-[11px] text-slate-400 mb-1">Amount (grams)</label>
+                <input 
+                  type="number" 
+                  [ngModel]="grams()" 
+                  (ngModelChange)="grams.set($event)"
+                  min="1"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                >
+              </div>
+            }
+            
+            @if (currentMealContext() === 'All') {
+              <div class="flex-1">
+                <label class="block text-[11px] text-slate-400 mb-1">Select Meal</label>
+                <select 
+                  [ngModel]="selectedMealToLog()" 
+                  (ngModelChange)="selectedMealToLog.set($event)"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                >
+                  <option value="Breakfast">Breakfast</option>
+                  <option value="Lunch">Lunch</option>
+                  <option value="Dinner">Dinner</option>
+                  <option value="Snack">Snack</option>
+                </select>
+              </div>
+            }
+          </div>
         </div>
 
         <button 
-          (click)="createNewFood()"
-          [disabled]="!newFood().name || newFood().calories < 0"
-          class="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold py-2 rounded-lg transition-colors"
+          (click)="addFoodLog()"
+          [disabled]="!selectedFood() || effectiveGrams() <= 0"
+          class="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-colors shadow-lg shadow-indigo-600/25 flex items-center justify-center space-x-2"
         >
-          Save Food to Database
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Add to {{ currentMealContext() === 'All' ? selectedMealToLog() : currentMealContext() }}</span>
         </button>
       </div>
     }
-  </div>
+  }
 </div>
