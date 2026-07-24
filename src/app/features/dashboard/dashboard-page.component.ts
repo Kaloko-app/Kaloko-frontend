@@ -15,6 +15,7 @@ export class DashboardPageComponent implements OnInit {
   private nutritionService = inject(NutritionService);
 
   public user = this.authService.currentUser;
+  public showProfileMenu = signal<boolean>(false);
   
   public dailyLogs = this.nutritionService.dailyLogs;
 
@@ -40,7 +41,12 @@ export class DashboardPageComponent implements OnInit {
     });
   }
 
+  toggleProfileMenu() {
+    this.showProfileMenu.update(v => !v);
+  }
+
   logout() {
+    this.showProfileMenu.set(false);
     this.authService.logout();
   }
 }
